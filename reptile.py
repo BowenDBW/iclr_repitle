@@ -15,12 +15,12 @@ class OpenreviewReptile:
         self.__show_browser = show_browser
         self.__clear_cmd = 'cls' if os.name == 'nt' else 'clear'
         if show_browser:
+            self.__driver = webdriver.Chrome()
+        else:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu" if os.name == 'nt' else '--no-sandbox')
             self.__driver = webdriver.Chrome(options=chrome_options)
-        else:
-            self.__driver = webdriver.Chrome()
 
     def get_article_links(self, link, page_count):
         self.__driver.get(link)
