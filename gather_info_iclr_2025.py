@@ -1,4 +1,5 @@
 import os
+import time
 
 from reptile import OpenreviewReptile
 from storage import ICLRStorage
@@ -25,6 +26,7 @@ if __name__ == "__main__":
     link_prefix = 'https://openreview.net'
     db = ICLRStorage('root', 'admin', 'iclr2025')
 
+    time.sleep(1)
     for link in tqdm(all_links, desc="Processing articles"):
         article = openreview.get_article_info(link_prefix + link, 2025)
         if article is None:

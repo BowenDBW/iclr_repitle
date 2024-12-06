@@ -7,12 +7,12 @@ create table article (
     year int not null,
     id int primary key auto_increment,
     serial int not null,
-    title varchar(255) not null,
+    title varchar(512) not null,
     author varchar(255),
-    keywords varchar(255) not null,
+    keywords varchar(4096) not null,
     abstract text not null,
     tl_dr text,
-    primary_area varchar(255) not null,
+    primary_area varchar(512) not null,
     download_link varchar(255) not null
 );
 create table rating (
