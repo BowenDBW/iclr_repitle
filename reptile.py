@@ -21,9 +21,8 @@ def get_article_links(link, page_count):
     # Initialize Selenium WebDriver
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    service = Service('/path/to/chromedriver')
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    chrome_options.add_argument("--disable-gpu" if os.name == 'nt' else '--no-sandbox')
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get(link)
     # Wait for the page to load
     wait = WebDriverWait(driver, 10)
@@ -144,11 +143,3 @@ def download_pdf(link, dir='./', filename=None):
         filename = f'article{time.time()}.pdf'
     with open(dir + filename, 'wb') as f:
         f.write(response.content)
-
-if __name__ == '__main__':
-    storage = ICLRStorage('root', 'admin', 'iclr')
-    article = get_article_info("https://openreview.net/forum?id=J1SGf2lyr6", 2025)
-    print(f"Titile {article.title};\n Keywords {article.keywords};\n TL;DR {article.tl_dr};\n "
-          f"Abstract {article.abstract};\n Primary Area {article.primary_area};\n "
-          f"Ratings {article.ratings};\n Download Link {article.download_link}")
-    storage.save_article(article)
