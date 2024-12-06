@@ -13,6 +13,6 @@ python gather_info_iclr_2025.py
 ```     
 ##### 2. Select submissions based on ratings and/or your interests
 
-##### 3. download targeting articles in pdg form
+##### 3. download targeting articles in pdf form
 
 ##### 4. Yet you can analyze the ratings, hot topics and visualize the results
