@@ -1,6 +1,5 @@
 # An OpenReview Crawler
 crawl, select and visualize submissions from a conference on OpenReview
-The code in gather_info_iclr_2025.py is based on the ICLR 2025 conference
 
 ### Usage
 ##### 1. Read submissions from OpenReview
