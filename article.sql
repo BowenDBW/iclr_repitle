@@ -1,6 +1,6 @@
-drop database if exists iclr;
-create database iclr;
-use iclr;
+drop database if exists iclr2025;
+create database iclr2025;
+use iclr2025;
 drop table if exists rating;
 drop table if exists article;
 create table article (

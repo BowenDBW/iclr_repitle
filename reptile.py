@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from storage import Article
 from tqdm import tqdm
@@ -14,13 +15,25 @@ class OpenreviewReptile:
     def __init__(self, show_browser=False):
         self.__show_browser = show_browser
         self.__clear_cmd = 'cls' if os.name == 'nt' else 'clear'
-        if show_browser:
+        self.__driver = None
+        # start the driver
+        self.start_driver()
+
+    def stop_driver(self):
+        self.__driver.quit()
+
+    def start_driver(self):
+        if self.__show_browser:
             self.__driver = webdriver.Chrome()
         else:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu" if os.name == 'nt' else '--no-sandbox')
             self.__driver = webdriver.Chrome(options=chrome_options)
+
+    def restart_driver(self):
+        self.stop_driver()
+        self.start_driver()
 
     def get_article_links(self, link, page_count):
         self.__driver.get(link)
@@ -29,8 +42,10 @@ class OpenreviewReptile:
         wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="active-submissions"]/div/div/ul')))
 
         all_links = []
+        previous_first_link = None
+
         # Iterate through all pages
-        for page in tqdm(range(1, page_count), desc="Fetching pages", unit="page", ncols=100):
+        for page in tqdm(range(1, page_count + 1), desc="Fetching pages", unit="page", ncols=100):
             # Wait for the current page's list to load
             wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="active-submissions"]/div/div/ul')))
 
@@ -49,22 +64,38 @@ class OpenreviewReptile:
                             if 'pdf-link' not in a.get('class', []):
                                 all_links.append(a['href'])
 
-            # Click next page
+            # Check if it's the last page
+            if page == page_count:
+                break
+
+            # Click next page and wait for the first article link to change
             next_page_li = self.__driver.find_element(By.XPATH,
-                                               f'//*[@id="active-submissions"]/div/div/nav/ul/li/a[text()="{page + 1}"]')
+                                                      f'//*[@id="active-submissions"]/div/div/nav/ul/li/a[text()="{page + 1}"]')
             next_page_button = wait.until(EC.element_to_be_clickable(next_page_li))
             next_page_button.click()
+            # Wait for the first article link to change
+            while True:
+                try:
+                    wait.until(EC.presence_of_element_located(
+                        (By.XPATH, '//*[@id="active-submissions"]/div/div/ul/li[1]/h4/a')))
+                    first_link = self.__driver.find_element(By.XPATH,
+                                                            '//*[@id="active-submissions"]/div/div/ul/li[1]/h4/a').get_attribute(
+                        'href')
+                    if first_link != previous_first_link:
+                        previous_first_link = first_link
+                        break
+                except TimeoutException:
+                    break
 
         return all_links
 
-    # 输入文章链接 获取标题，关键词，摘要，主要领域，投稿编号，3-5个评分
     def get_article_info(self, link, year):
         self.__driver.get(link)
 
         wait = WebDriverWait(self.__driver, 100)
         wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/h2')))
 
-        # 提取信息
+        # Extract information
         keywords = None
         tl_dr = None
         abstract = None
@@ -97,8 +128,8 @@ class OpenreviewReptile:
             except:
                 break
 
-        download_link = self.__driver.find_element(By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/div/a').get_attribute(
-            'href')
+        download_link = self.__driver.find_element(By.XPATH,
+                                                   '//*[@id="content"]/div/div[1]/div[1]/div/a').get_attribute('href')
         # Extract ratings
         ratings = []
         comment_index = 1
