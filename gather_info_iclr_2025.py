@@ -11,7 +11,7 @@ def clear_console():
 
 if __name__ == "__main__":
 
-    page_count = 373
+    page_count = 372
 
     print("=> 1. Starting webdriver...")
     openreview = OpenreviewReptile(show_browser=False, chrome_driver=True)
