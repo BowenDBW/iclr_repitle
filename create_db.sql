@@ -9,7 +9,7 @@ create table article (
     serial int not null,
     title varchar(512) not null,
     author varchar(255),
-    keywords varchar(2048) not null,
+    keywords varchar(4096) not null,
     abstract_file_link varchar(255) not null,
     tl_dr text,
     primary_area varchar(512) not null,
