@@ -12,7 +12,8 @@ from tqdm import tqdm
 
 
 class OpenreviewReptile:
-    def __init__(self, show_browser=False):
+    def __init__(self, show_browser=False, chrome_driver=True):
+        self.__chrome_driver = chrome_driver
         self.__show_browser = show_browser
         self.__clear_cmd = 'cls' if os.name == 'nt' else 'clear'
         self.__driver = None
@@ -24,18 +25,24 @@ class OpenreviewReptile:
 
     def start_driver(self):
         if self.__show_browser:
-            self.__driver = webdriver.Chrome()
+            if self.__chrome_driver:
+                self.__driver = webdriver.Chrome()
+            else:
+                self.__driver = webdriver.Edge()
         else:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--disable-gpu" if os.name == 'nt' else '--no-sandbox')
-            self.__driver = webdriver.Chrome(options=chrome_options)
+            options = Options()
+            options.headless = True
+            if self.__chrome_driver:
+                self.__driver = webdriver.Chrome(options=options)
+            else:
+                self.__driver = webdriver.Edge(options=options)
 
     def restart_driver(self):
         self.stop_driver()
         self.start_driver()
 
     def get_article_links(self, link, page_count):
+        print(link)
         self.__driver.get(link)
         # Wait for the page to load
         wait = WebDriverWait(self.__driver, 10)
