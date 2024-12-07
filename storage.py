@@ -55,3 +55,20 @@ class ICLRStorage:
             query = "INSERT INTO rating (article_id, rating) VALUES (%s, %s)"
             self.__cursor.execute(query, (article_id, rating))
             self.__connection.commit()
+
+    def get_abstract_links(self):
+        query = "SELECT (id, title, abstract_file_link) FROM article"
+        self.__cursor.execute(query)
+        return self.__cursor.fetchall()
+
+    def get_keywords(self):
+        query = "SELECT (id, title, keywords) FROM article"
+        self.__cursor.execute(query)
+        return self.__cursor.fetchall()
+
+    def get_articles_by_page(self, page_num):
+        page_size = 500
+        offset = (page_num - 1) * page_size
+        query = "SELECT * FROM article LIMIT %s OFFSET %s"
+        self.__cursor.execute(query, (page_size, offset))
+        return self.__cursor.fetchall()
