@@ -1,3 +1,5 @@
+import os
+
 import pymysql
 
 class Article:
@@ -16,6 +18,7 @@ class Article:
 
 class ICLRStorage:
     def __init__(self, username, password, database):
+        self.__database_name = database
         self.__connection = pymysql.connect(
             host='localhost', user=username, password=password, database=database)
         self.__cursor = self.__connection.cursor()
@@ -27,11 +30,20 @@ class ICLRStorage:
         if self.__cursor.fetchone() is not None:
             print(f"\nArticle {article.title} already exists.")
             return
+        # check if folder /abstracts/{database_name} exists
+        if not os.path.exists(f"abstracts/{self.__database_name}"):
+            os.makedirs(f"abstracts/{self.__database_name}")
+        # save abstract to file
+        with open(f"abstracts/{self.__database_name}/{article.title}.txt", 'w') as f:
+            f.write(article.abstract)
         query = (
-            "INSERT INTO article (serial, title, author, keywords, tl_dr, primary_area, abstract, download_link, year) "
+            "INSERT INTO article (serial, title, author, keywords, tl_dr, primary_area, "
+            "abstract_file_link, download_link, year) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
-        values = (article.serial, article.title, article.author, article.keywords, article.tl_dr,
-                  article.primary_area, article.abstract, article.download_link, article.year)
+        abstract_file_link = f"abstracts/{self.__database_name}/{article.title}.txt"
+        values = (article.serial, article.title, article.author, article.keywords,
+                  article.tl_dr, article.primary_area, abstract_file_link,
+                  article.download_link, article.year)
         self.__cursor.execute(query, values)
         self.__connection.commit()
         # get id of this article
