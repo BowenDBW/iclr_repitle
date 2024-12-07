@@ -11,20 +11,31 @@ def clear_console():
 
 if __name__ == "__main__":
 
-    page_count = 372
+    page_count = 2
+    db = ICLRStorage('root', 'admin', 'iclr2025')
+    submission_link = 'https://openreview.net/group?id=ICLR.cc/2025/Conference#tab-active-submissions'
 
     print("=> 1. Starting webdriver...")
     openreview = OpenreviewReptile(show_browser=False, chrome_driver=True)
 
-    print("=> 2. Fetching article links...")
-    submission_link = 'https://openreview.net/group?id=ICLR.cc/2025/Conference#tab-active-submissions'
-    all_links = openreview.get_article_links(submission_link, page_count)
+    print("=> 2(1). Check if links are already crawled...")
+    if db.is_link_empty():
+        print("=> 2(2). Fetching article links...")
+        all_links = openreview.get_article_links(submission_link, page_count)
+        print(f"[INFO] Found {len(all_links)} articles.")
+        for link in all_links:
+            db.insert_article_link(link)
+    else:
+        print("=> 2(2). Links already crawled. Skipping...")
+
+    print("=> 3. Fetching article links from database...")
+    all_links = db.get_article_links()
+    # turn tuples into list
+    all_links = [link[0] for link in all_links]
     print(f"[INFO] Found {len(all_links)} articles.")
 
-    # 2. get all articles' information and save them to database
-    print("=> 3. Fetching article information and saving to database...")
+    print("=> 4. Fetching article information and saving to database...")
     link_prefix = 'https://openreview.net'
-    db = ICLRStorage('root', 'admin', 'iclr2025')
 
     time.sleep(1)
     for link in tqdm(all_links, desc="Processing articles"):

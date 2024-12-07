@@ -1,5 +1,5 @@
 import os
-
+import hashlib
 import pymysql
 
 class Article:
@@ -28,19 +28,20 @@ class ICLRStorage:
         query = "SELECT * FROM article WHERE title = %s"
         self.__cursor.execute(query, (article.title,))
         if self.__cursor.fetchone() is not None:
-            print(f"\nArticle {article.title} already exists.")
             return
         # check if folder /abstracts/{database_name} exists
         if not os.path.exists(f"abstracts/{self.__database_name}"):
             os.makedirs(f"abstracts/{self.__database_name}")
+        # md5 to avoid too long file name
+        filename = hashlib.md5(article.title.encode()).hexdigest()
         # save abstract to file
-        with open(f"abstracts/{self.__database_name}/{article.title}.txt", 'w') as f:
+        with open(f"abstracts/{self.__database_name}/{filename}.txt", 'w') as f:
             f.write(article.abstract)
         query = (
             "INSERT INTO article (serial, title, author, keywords, tl_dr, primary_area, "
             "abstract_file_link, download_link, year) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
-        abstract_file_link = f"abstracts/{self.__database_name}/{article.title}.txt"
+        abstract_file_link = f"abstracts/{self.__database_name}/{filename}.txt"
         values = (article.serial, article.title, article.author, article.keywords,
                   article.tl_dr, article.primary_area, abstract_file_link,
                   article.download_link, article.year)
@@ -55,6 +56,21 @@ class ICLRStorage:
             query = "INSERT INTO rating (article_id, rating) VALUES (%s, %s)"
             self.__cursor.execute(query, (article_id, rating))
             self.__connection.commit()
+
+    def insert_article_link(self, link):
+        query = "INSERT INTO article_link (link) VALUES (%s)"
+        self.__cursor.execute(query, (link,))
+        self.__connection.commit()
+
+    def is_link_empty(self):
+        query = "SELECT * FROM article_link"
+        self.__cursor.execute(query)
+        return self.__cursor.fetchone() is None
+
+    def get_article_links(self):
+        query = "SELECT link FROM article_link"
+        self.__cursor.execute(query)
+        return self.__cursor.fetchall()
 
     def get_abstract_links(self):
         query = "SELECT (id, title, abstract_file_link) FROM article"

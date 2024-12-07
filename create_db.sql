@@ -3,6 +3,10 @@ create database iclr2025;
 use iclr2025;
 drop table if exists rating;
 drop table if exists article;
+create table article_link (
+    id int primary key auto_increment,
+    link varchar(255) not null
+);
 create table article (
     year int not null,
     id int primary key auto_increment,

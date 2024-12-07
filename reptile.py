@@ -107,6 +107,7 @@ class OpenreviewReptile:
         tl_dr = None
         abstract = None
         primary_area = None
+        serial = None
 
         title = self.__driver.find_element(By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/h2').text
 
