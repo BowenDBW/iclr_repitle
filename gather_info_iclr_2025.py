@@ -14,7 +14,7 @@ if __name__ == "__main__":
     page_count = 373
 
     print("=> 1. Starting webdriver...")
-    openreview = OpenreviewReptile(show_browser=True, chrome_driver=False)
+    openreview = OpenreviewReptile(show_browser=False, chrome_driver=True)
 
     print("=> 2. Fetching article links...")
     submission_link = 'https://openreview.net/group?id=ICLR.cc/2025/Conference#tab-active-submissions'
