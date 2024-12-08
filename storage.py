@@ -94,3 +94,12 @@ class ICLRStorage:
         query = "SELECT COUNT(*) FROM article"
         self.__cursor.execute(query)
         return self.__cursor.fetchone()[0]
+
+    def get_by_avg_rating(self, rating):
+        query = (
+            "SELECT a.* FROM article a "
+            "JOIN rating r ON a.id = r.article_id "
+            "GROUP BY a.id HAVING AVG(r.rating) >= %s"
+        )
+        self.__cursor.execute(query, (rating,))
+        return self.__cursor.fetchall()
