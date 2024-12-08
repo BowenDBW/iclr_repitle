@@ -100,7 +100,11 @@ class OpenreviewReptile:
         self.__driver.get(link)
 
         wait = WebDriverWait(self.__driver, 100)
-        wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/h2')))
+        try:
+            wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/h2')))
+        except TimeoutException:
+            self.__driver.get(link)
+            wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[1]/div[1]/h2')))
 
         # Extract information
         keywords = None

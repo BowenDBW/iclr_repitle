@@ -11,7 +11,7 @@ def clear_console():
 
 if __name__ == "__main__":
 
-    page_count = 2
+    page_count = 372
     db = ICLRStorage('root', 'admin', 'iclr2025')
     submission_link = 'https://openreview.net/group?id=ICLR.cc/2025/Conference#tab-active-submissions'
 
@@ -36,9 +36,17 @@ if __name__ == "__main__":
 
     print("=> 4. Fetching article information and saving to database...")
     link_prefix = 'https://openreview.net'
-
     time.sleep(1)
-    for link in tqdm(all_links, desc="Processing articles"):
+
+    # Fetch already recorded article count
+    recorded_count = db.get_article_count()
+
+    # Skip the first recorded_count links
+    unrecorded_links = all_links[recorded_count:]
+
+    print(f"[INFO] Found {len(unrecorded_links)} unrecorded articles.")
+
+    for link in tqdm(unrecorded_links, desc="Processing articles"):
         article = openreview.get_article_info(link_prefix + link, 2025)
         if article is None:
             continue

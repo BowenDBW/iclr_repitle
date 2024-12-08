@@ -28,6 +28,7 @@ class ICLRStorage:
         query = "SELECT * FROM article WHERE title = %s"
         self.__cursor.execute(query, (article.title,))
         if self.__cursor.fetchone() is not None:
+            print(f"[INFO] Article {article.title} already exists.")
             return
         # check if folder /abstracts/{database_name} exists
         if not os.path.exists(f"abstracts/{self.__database_name}"):
@@ -88,3 +89,8 @@ class ICLRStorage:
         query = "SELECT * FROM article LIMIT %s OFFSET %s"
         self.__cursor.execute(query, (page_size, offset))
         return self.__cursor.fetchall()
+
+    def get_article_count(self):
+        query = "SELECT COUNT(*) FROM article"
+        self.__cursor.execute(query)
+        return self.__cursor.fetchone()[0]
